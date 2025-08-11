@@ -1,0 +1,7 @@
+name: CannonEssentials
+version: '1.0-SNAPSHOT'
+main: me.samsuik.cannonessentials.CannonEssentials
+api-version: '1.18'
+loadbefore:
+  - PlotSquared
+  - WorldGuard
