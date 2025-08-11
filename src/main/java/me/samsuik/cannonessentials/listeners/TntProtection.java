@@ -5,7 +5,6 @@ import me.samsuik.cannonessentials.CannonEssentials;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -46,12 +45,7 @@ public final class TntProtection implements Listener {
             return;
         }
 
-        for (final Block block : explodeEvent.blockList()) {
-            if (this.isProtected(block.getLocation())) {
-                explodeEvent.blockList().clear();
-                return;
-            }
-        }
+        explodeEvent.blockList().removeIf(block -> this.isProtected(block.getLocation()));
     }
 
     private boolean isProtected(final Location location) {
