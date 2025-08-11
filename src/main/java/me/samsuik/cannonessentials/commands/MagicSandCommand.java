@@ -22,11 +22,12 @@ public final class MagicSandCommand implements BasicCommand {
 
     @Override
     public void execute(final CommandSourceStack stack, final String[] args) {
-        if (!(stack.getExecutor() instanceof Player player) || args.length < 1) {
+        if (!(stack.getExecutor() instanceof Player player)) {
             return;
         }
 
-        final Material material = Material.matchMaterial(args[0]);
+        final String requestedMaterial = args.length < 1 ? "sand" : args[0];
+        final Material material = Material.matchMaterial(requestedMaterial);
         final ItemStack itemStack = MagicSand.Item.fromMaterial(material);
 
         if (itemStack != null) {

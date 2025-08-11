@@ -49,14 +49,16 @@ public final class TntFillCommand implements BasicCommand {
                 for (final BlockState state : chunk.getTileEntities()) {
                     if (state instanceof Dispenser dispenser && dispenser.getLocation().distance(location) < fillRadius) {
                         final Inventory inventory = dispenser.getInventory();
-                        final ItemStack tnt = new ItemStack(Material.TNT, inventory.getSize() * 64);
+                        final int itemsToAdd = inventory.getSize() * 64;
+                        final ItemStack tnt = new ItemStack(Material.TNT, itemsToAdd);
                         final Map<Integer, ItemStack> remainingItems = dispenser.getInventory().addItem(tnt);
 
                         // Keep track of how much tnt we added
                         for (final ItemStack remaining : remainingItems.values()) {
                             totalFilledTnt -= remaining.getAmount();
                         }
-                        totalFilledTnt += tnt.getAmount();
+
+                        totalFilledTnt += itemsToAdd;
                     }
                 }
             }
