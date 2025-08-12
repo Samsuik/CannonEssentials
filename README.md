@@ -7,3 +7,4 @@ CannonEssentials provides the essential features for a modern cannon testing ser
 - TntFill (permission: "me.samsuik.cannonessentials.tntfill")
 - TntProtection
 - MagicSand (permission: "me.samsuik.cannonessentials.magicsand")
+- Disable item drops from dispensers
