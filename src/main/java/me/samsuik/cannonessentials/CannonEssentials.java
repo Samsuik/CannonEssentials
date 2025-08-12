@@ -6,7 +6,9 @@ import me.samsuik.cannonessentials.listeners.ItemDrops;
 import me.samsuik.cannonessentials.listeners.MagicSand;
 import me.samsuik.cannonessentials.listeners.TntProtection;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public final class CannonEssentials extends JavaPlugin {
     @Override
     public void onEnable() {
