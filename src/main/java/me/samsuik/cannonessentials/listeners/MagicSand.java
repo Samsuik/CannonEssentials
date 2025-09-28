@@ -17,19 +17,32 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @NullMarked
 public final class MagicSand implements Listener {
-    private final Map<Player, PlacedMagicSand> playerPlacedMagicSand = new HashMap<>();
+    private final Map<UUID, PlacedMagicSand> placedMagicSand = new HashMap<>();
     private final CannonEssentials plugin;
 
     public MagicSand(final CannonEssentials plugin) {
         this.plugin = plugin;
         MagicSand.Item.createItems(plugin);
+    }
+
+    public boolean placeMagicSand(final Player player, final Block block, final Material type) {
+        final PlacedMagicSand placedMagicSand = this.placedMagicSand.computeIfAbsent(
+                player.getUniqueId(),
+                p -> new PlacedMagicSand()
+        );
+
+        final int magicSandLimit = plugin.getConfig().getInt("magic-sand.limit", 0);
+        if (placedMagicSand.magicSand.size() >= magicSandLimit) {
+            player.sendRichMessage(plugin.getConfig().getString("magic-sand.limited", ""));
+            return false;
+        }
+
+        placedMagicSand.magicSand.put(block.getLocation(), type);
+        return true;
     }
 
     @EventHandler
@@ -38,20 +51,29 @@ public final class MagicSand implements Listener {
             return;
         }
 
-        for (final Map.Entry<Player, PlacedMagicSand> entry : this.playerPlacedMagicSand.entrySet()) {
-            // Players logging out while a cannon is running with magicsand is a massive cause of lag
-            if (!entry.getKey().isOnline()) {
+        for (final Map.Entry<UUID, PlacedMagicSand> entry : this.placedMagicSand.entrySet()) {
+            // Disable magic sand if the player is no longer online
+            if (this.plugin.getServer().getPlayer(entry.getKey()) == null) {
                 continue;
             }
 
+            final List<Location> toRemove = new ArrayList<>();
             for (final Map.Entry<Location, Material> magicSandEntry : entry.getValue().magicSand.entrySet()) {
-                final Location belowLocation = magicSandEntry.getKey().clone().subtract(0, 1, 0);
+                final Location magicSandLocation = magicSandEntry.getKey();
+                if (magicSandLocation.getBlock().getType() != Material.CLAY) {
+                    toRemove.add(magicSandLocation);
+                    continue;
+                }
+
+                final Location belowLocation = magicSandLocation.clone().subtract(0, 1, 0);
                 final Block block = belowLocation.getBlock();
 
                 if (belowLocation.isChunkLoaded() && block.getType().isAir()) {
                     block.setType(magicSandEntry.getValue());
                 }
             }
+
+            toRemove.forEach(location -> entry.getValue().magicSand.remove(location));
         }
     }
 
@@ -62,22 +84,14 @@ public final class MagicSand implements Listener {
 
         if (material != null) {
             final Player player = event.getPlayer();
-            final PlacedMagicSand placedMagicSand = this.playerPlacedMagicSand.computeIfAbsent(
-                    player,
-                    p -> new PlacedMagicSand()
-            );
-
-            final int magicSandLimit = plugin.getConfig().getInt("magic-sand.limit", 0);
-            if (placedMagicSand.magicSand.size() >= magicSandLimit) {
-                event.getPlayer().sendRichMessage(plugin.getConfig().getString("magic-sand.limited", ""));
-                return;
-            }
-
             final Block block = event.getBlock();
-            placedMagicSand.magicSand.put(block.getLocation(), material);
-            block.setType(Material.CLAY);
 
-            event.getPlayer().sendRichMessage(plugin.getConfig().getString("magic-sand.placed", ""));
+            if (!this.placeMagicSand(player, block, material)) {
+                event.setCancelled(true);
+            } else {
+                block.setType(Material.CLAY);
+                player.sendRichMessage(plugin.getConfig().getString("magic-sand.placed", ""));
+            }
         }
     }
 
@@ -86,7 +100,7 @@ public final class MagicSand implements Listener {
         final Block block = event.getBlock();
         final Location location = block.getLocation();
 
-        for (final PlacedMagicSand placedMagicSand : this.playerPlacedMagicSand.values()) {
+        for (final PlacedMagicSand placedMagicSand : this.placedMagicSand.values()) {
             if (placedMagicSand.magicSand.remove(location) != null) {
                 event.getPlayer().sendRichMessage(plugin.getConfig().getString("magic-sand.broken", ""));
             }

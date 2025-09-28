@@ -1,13 +1,15 @@
 tnt-fill:
   message: "<gray><<#FF8000>S</#FF8000>> <white>Filled dispensers with <count> TNT"
-  radius: 64.0
+  radius: 64
 protection-materials:
   - EMERALD_BLOCK
 magic-sand:
+  refill: "<gray><<#FF8000>S</#FF8000>> <white>Refill <count> MagicSand blocks"
   give: "<gray><<#FF8000>S</#FF8000>> <white>You have been given a MagicSand block"
   placed: "<gray><<#FF8000>S</#FF8000>> <white>You have placed a MagicSand block"
   broken: "<gray><<#FF8000>S</#FF8000>> <white>You have broken a MagicSand block"
   limited: "<gray><<#FF8000>S</#FF8000>> <white>You have hit the MagicSand limit"
   item-name: "<#FF8000>Magic Sand <dark_gray>(<white><material></white>)"
   limit: 256
+  radius: 32
 disable-dispenser-drops: true
